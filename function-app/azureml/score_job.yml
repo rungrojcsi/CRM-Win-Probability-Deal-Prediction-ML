@@ -1,0 +1,20 @@
+# Azure ML command job — predictive batch scoring pilot (F11).
+# Run:  az ml job create -f azureml/score_job.yml -g RESOURCE_GROUP -w aml-crm-app
+# `code: ..` ships the whole function-app package so `predictive` and `transform`
+# import; the entry runs from that root.
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+display_name: crm-predictive-score
+description: Train + score CRM_PDT_BASE/MIX/AZ and upsert to prod Postgres.
+code: ..
+command: python azureml/score_entry.py
+environment:
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu22.04
+  conda_file: conda_env.yml
+compute: azureml:cpu-cluster        # low-priority, scale-to-0 (see README)
+environment_variables:
+  KEYVAULT_URI: https://kv-crm-app.vault.azure.net/
+  PBI_WORKSPACE_ID: "00000000-0000-0000-0000-000000000000"   # SALES_DATA
+  PBI_DATASET_ID: "00000000-0000-0000-0000-000000000000"     # SALES DATA MODEL
+  PBI_TENANT_ID: "00000000-0000-0000-0000-000000000000"
+  # POSTGRES_CONN_STR + PBI_CLIENT_ID/SECRET are pulled from Key Vault by score_entry.py
+  # via the compute's managed identity (no secrets in this file).

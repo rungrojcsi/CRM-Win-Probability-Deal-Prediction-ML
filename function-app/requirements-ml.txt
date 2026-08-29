@@ -1,0 +1,6 @@
+# ML training/scoring deps — install ONLY where predictive.pipeline.run_scoring runs
+# (local dev, scheduled trainer, or a Premium-plan function). NOT in the lean
+# serving function runtime (see requirements.txt).
+-r requirements.txt
+scikit-learn==1.6.1
+shap==0.49.1

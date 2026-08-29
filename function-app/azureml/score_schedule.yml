@@ -1,0 +1,11 @@
+# Monthly schedule for the predictive scoring job (F11).
+# Create:  az ml schedule create -f azureml/score_schedule.yml -g RESOURCE_GROUP -w aml-crm-app
+# Runs on the 2nd of each month 02:00 Bangkok (data refresh + month rollover settled).
+$schema: https://azuremlschemas.azureedge.net/latest/schedule.schema.json
+name: crm-predictive-monthly
+display_name: crm predictive monthly re-score
+trigger:
+  type: cron
+  expression: "0 2 2 * *"
+  time_zone: "SE Asia Standard Time"
+create_job: ./score_job.yml

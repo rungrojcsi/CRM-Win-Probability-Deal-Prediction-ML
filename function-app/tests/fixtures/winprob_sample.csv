@@ -1,0 +1,7 @@
+Opportunity ID,Status,SO Plan Amount (P),Possibility,Progress,Aging Days,Sales Cycle Days,Flag Hot,Create Date,Last Activity Date,Solution Name,Prospect Category Name
+OPP-W1,Won,3500000,80,90,15,120,Yes,2024-09-01,2025-05-20,MES Standard,Manufacturing IT
+OPP-W2,Won,1200000,70,85,30,95,Yes,2024-10-15,2025-05-18,ERP Enterprise,ERP
+OPP-L1,Lost,7500000,20,30,310,330,No,2024-01-10,2024-06-01,IoT Platform,IoT
+OPP-L2,Lost,900000,15,20,280,300,No,2024-02-20,2024-04-15,QC Vision,Electronics
+OPP-O1,Open,2100000,55,60,40,,No,2025-04-01,2025-05-22,SCADA Upgrade,Manufacturing IT
+OPP-O2,Open,1850000,60,50,,,,2025-03-15,,MES Standard,Manufacturing IT

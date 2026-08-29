@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM ML Predictive Dashboard</title>
+  <link rel="stylesheet" href="styles.css?v=20260627b" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>CRM&nbsp;Predictive&nbsp;Dashboard</h1>
+    <div class="controls">
+      <label>API <input id="apiBase" type="text" size="30" /></label>
+      <label>key <input id="apiKey" type="password" size="14" placeholder="function key" /></label>
+      <label>as of <input id="asof" type="date" /></label>
+      <button id="refresh">Refresh</button>
+      <button id="settingsBtn" class="icon-btn" title="Settings" aria-label="Settings">⚙</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="incomeplan">Fact_IncomePlan</button>
+    <button class="tab-btn" data-tab="opp">Fact_Opportunity</button>
+  </nav>
+
+  <main>
+    <!-- ============ TAB 1 — Fact_IncomePlan (income-line grain) ============ -->
+    <div class="tab-panel" id="panel-incomeplan">
+      <!-- Yearly — Actual (elapsed) + Prediction (future), same layout as Opportunity -->
+      <section class="zone collapsed" id="ip-yearly">
+        <button class="hide-btn">Show</button>
+        <h2>Annual Predictive SO — IncomePlan</h2>
+        <p class="muted">Income-LINE grain (P) — elapsed months = realized SO Actual; current+future = predicted Expected (line × deal win-prob).</p>
+        <div class="kpis" id="ipYearlyKpis"></div>
+        <div class="bandbar" id="ipYearlyBar"></div>
+        <div class="zone-detail">
+          <div class="row2">
+            <div>
+              <h3 class="sub">Monthly SO — Actual (elapsed)</h3>
+              <table class="grid" id="ipActualTable">
+                <thead><tr><th>Month</th><th>SO Actual</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div>
+              <h3 class="sub">Monthly SO — Prediction: Prospect Pipeline · Win% · Expected</h3>
+              <table class="grid" id="ipPredTable">
+                <thead><tr><th>Month</th><th>Prospect Pipeline (P)</th><th>Win%</th><th>Expected</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Monthly (current month) by customer -->
+      <section class="zone collapsed" id="ip-monthly">
+        <button class="hide-btn">Show</button>
+        <h2>Current Month Predictive SO by Customer — IncomePlan</h2>
+        <div class="kpis" id="ipMonthlyKpis"></div>
+        <div class="bandbar" id="ipMonthlyBar"></div>
+        <div class="zone-detail">
+          <div class="tablebar">
+            <span class="muted" id="ipMonthlyMeta"></span>
+            <label class="rowsel">show
+              <select id="ipMonthlyLimit">
+                <option>25</option><option selected>50</option><option>100</option><option>200</option><option value="0">All</option>
+              </select> rows · sorted by amount · click a column to re-sort
+            </label>
+          </div>
+          <table class="grid sortable" id="ipMonthlyTable">
+            <thead><tr><th>#</th><th>Account</th><th>Plan Month</th><th>SO Plan (P)</th><th>Win%</th><th>Band</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Next 3 months by customer -->
+      <section class="zone collapsed" id="ip-next3">
+        <button class="hide-btn">Show</button>
+        <h2>Next 3 Month Predictive SO by Customer — IncomePlan</h2>
+        <div class="kpis" id="ipNext3Kpis"></div>
+        <div class="bandbar" id="ipNext3Bar"></div>
+        <div class="zone-detail">
+          <div class="tablebar">
+            <span class="muted" id="ipNext3Meta"></span>
+            <label class="rowsel">show
+              <select id="ipNext3Limit">
+                <option>25</option><option selected>50</option><option>100</option><option>200</option><option value="0">All</option>
+              </select> rows · sorted by amount · click a column to re-sort
+            </label>
+          </div>
+          <table class="grid sortable" id="ipNext3Table">
+            <thead><tr><th>#</th><th>Account</th><th>Plan Month</th><th>SO Plan (P)</th><th>Win%</th><th>Band</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Delay Prospects (income-line past-due, deal still open) -->
+      <section class="zone collapsed" id="ip-delayed">
+        <button class="hide-btn">Show</button>
+        <h2>Delay Prospects — IncomePlan</h2>
+        <p class="muted">Open deals whose income-line SO Plan date has already passed (past-due / slipping) — income-line grain. Excluded from the forward forecast.</p>
+        <div class="kpis" id="ipDelayedKpis"></div>
+        <div class="bandbar" id="ipDelayedBar"></div>
+        <div class="zone-detail">
+          <div class="tablebar">
+            <span class="muted" id="ipDelayedMeta"></span>
+            <label class="rowsel">show
+              <select id="ipDelayedLimit">
+                <option>25</option><option selected>50</option><option>100</option><option>200</option><option value="0">All</option>
+              </select> rows · sorted by amount · click a column to re-sort
+            </label>
+          </div>
+          <table class="grid sortable" id="ipDelayedTable">
+            <thead><tr><th>#</th><th>Account</th><th>Plan Month</th><th>SO Plan (P)</th><th>Win%</th><th>Band</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ TAB 2 — Fact_Opportunity (deal-header grain) ============ -->
+    <div class="tab-panel" id="panel-opp" hidden>
+      <!-- Yearly -->
+      <section class="zone collapsed" id="zone-so-forecast">
+        <button class="hide-btn">Show</button>
+        <h2>Annual Predictive SO</h2>
+        <div class="kpis" id="soYearlyKpis"></div>
+        <div class="bandbar" id="annualBar"></div>
+        <div class="zone-detail">
+          <div class="row2">
+            <div>
+              <h3 class="sub">Monthly SO — Actual (elapsed)</h3>
+              <table class="grid" id="soActualTable">
+                <thead><tr><th>Month</th><th>SO Actual</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div>
+              <h3 class="sub">Monthly SO — Prediction: Prospect Pipeline · Expected · Conservative (P10)</h3>
+              <table class="grid" id="soPredTable">
+                <thead><tr><th>Month</th><th>Prospect Pipeline</th><th>Win%</th><th>Expected</th><th>Conservative</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Monthly (current month) -->
+      <section class="zone collapsed" id="zone-pipeline">
+        <button class="hide-btn">Show</button>
+        <h2>Current Month Predictive SO by Customer</h2>
+        <div class="kpis" id="pipelineKpis"></div>
+        <div class="bandbar" id="bandBar"></div>
+        <div class="zone-detail">
+          <div class="tablebar">
+            <span class="muted" id="pipeMeta"></span>
+            <label class="rowsel">show
+              <select id="pipeLimit">
+                <option>25</option><option selected>50</option><option>100</option><option>200</option>
+              </select> rows · sorted by amount · click a column to re-sort
+            </label>
+          </div>
+          <table class="grid sortable" id="dealsTable">
+            <thead>
+              <tr><th>#</th><th>Opportunity</th><th>Amount</th><th>Win%</th><th>Band</th><th>Top drivers</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Next 3 months -->
+      <section class="zone collapsed" id="zone-next3">
+        <button class="hide-btn">Show</button>
+        <h2>Next 3 Month Predictive SO by Customer</h2>
+        <div class="kpis" id="next3Kpis"></div>
+        <div class="bandbar" id="next3Bar"></div>
+        <div class="zone-detail">
+          <p class="muted" id="next3Meta"></p>
+          <table class="grid sortable" id="next3Table">
+            <thead><tr><th>#</th><th>Account</th><th>Plan Month</th><th>Prospect Pipeline (P)</th><th>Win%</th><th>Band</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Delay Prospects (deal-header past-due, deal still open = at-risk) -->
+      <section class="zone collapsed" id="zone-delayed">
+        <button class="hide-btn">Show</button>
+        <h2>Delay Prospects</h2>
+        <p class="muted">Open deals whose SO Plan date (deal header) has already passed — past-due / at-risk, excluded from the monthly pipeline.</p>
+        <div class="kpis" id="delayedKpis"></div>
+        <div class="bandbar" id="delayedBar"></div>
+        <div class="zone-detail">
+          <div class="tablebar">
+            <span class="muted" id="delayedMeta"></span>
+            <label class="rowsel">show
+              <select id="delayedLimit">
+                <option>25</option><option selected>50</option><option>100</option><option>200</option><option value="0">All</option>
+              </select> rows · sorted by amount · click a column to re-sort
+            </label>
+          </div>
+          <table class="grid sortable" id="delayedTable">
+            <thead><tr><th>#</th><th>Account</th><th>Plan Month</th><th>Amount</th><th>Win%</th><th>Band</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ Settings ============ -->
+    <div class="tab-panel" id="panel-settings" hidden>
+      <section class="zone settings" id="settings-zone">
+        <h2>Settings</h2>
+        <div class="settings-group">
+          <h3 class="sub">Visible tabs</h3>
+          <label class="setrow"><input type="checkbox" class="tabToggle" value="incomeplan" checked /> Fact_IncomePlan</label>
+          <label class="setrow"><input type="checkbox" class="tabToggle" value="opp" checked /> Fact_Opportunity</label>
+          <p class="muted">Uncheck to hide a tab from the bar (at least one stays on).</p>
+        </div>
+        <div class="settings-group">
+          <h3 class="sub">Model</h3>
+          <label class="setrow"><input type="radio" name="modelRadio" value="CRM_PDT_BASE" /> CRM_PDT_WonLostOPP <span class="muted">— Won/Lost · opportunity base</span></label>
+          <label class="setrow"><input type="radio" name="modelRadio" value="CRM_PDT_MIX" /> CRM_PDT_WonLostINC <span class="muted">— Won/Lost · + income-line features</span></label>
+          <label class="setrow"><input type="radio" name="modelRadio" value="CRM_PDT_AZ" /> CRM_PDT_SOConversion <span class="muted">— Sales-Order conversion (Azure pilot)</span></label>
+          <p class="muted">Applies to every tab.</p>
+        </div>
+        <div class="settings-actions">
+          <button id="settingsSave" class="primary">Save &amp; Refresh</button>
+          <span class="muted">Saved in this browser (localStorage).</span>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="modal" id="dealModal" hidden>
+    <div class="modal-card">
+      <button class="close" id="modalClose">×</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+  <script src="app.js?v=20260627b"></script>
+</body>
+</html>
