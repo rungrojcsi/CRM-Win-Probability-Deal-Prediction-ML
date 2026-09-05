@@ -16,6 +16,8 @@ Split from the `RAG_Azure` monorepo (2026-08). The legacy RAG pipeline now lives
 
 **The shift:** leadership forecasting moves from *a number assembled by hand each quarter* to a *model-backed, explainable read* that traces to individual deals and their odds.
 
+![Architecture — win-probability ML pipeline](docs/images/architecture.png)
+
 ## 1. Pain Points
 
 Problems in sales pipeline management before this tool existed:
